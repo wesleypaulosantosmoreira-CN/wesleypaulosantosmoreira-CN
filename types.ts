@@ -15,15 +15,6 @@ export interface Module {
   isVisible?: boolean;
 }
 
-// --- ESTRUTURA DA LIVE ---
-export interface LiveEvent {
-  id: string;
-  title: string;
-  meetUrl: string;
-  date: string; // ISO String
-  active: boolean; // Se está acontecendo agora ou agendada
-}
-
 // --- ESTRUTURA DA PROVA FINAL ---
 export interface Question {
   id: string;
@@ -43,21 +34,10 @@ export interface ExamResult {
   date: string;
 }
 
-// --- ESTRUTURA DA AVALIAÇÃO DO CURSO ---
-export interface CourseRating {
-  id: string;
-  userId: string;
-  userName: string;
-  rating: number; // 1 to 5
-  comment: string;
-  createdAt: string;
-}
-
 export enum AppState {
   WATCHING,
   FINAL_EXAM, // Novo estado
-  COURSE_RESULT,
-  LIVE_WATCH
+  COURSE_RESULT
 }
 
 export type UserRole = 'student' | 'admin';
@@ -80,7 +60,6 @@ export interface Comment {
   userName: string;
   text: string;
   createdAt: string;
-  isRead?: boolean; // Novo campo para controlar visibilidade no painel admin
 }
 
 export interface LessonSidebarProps {
@@ -94,6 +73,4 @@ export interface LessonSidebarProps {
   isAdmin?: boolean;
   onDeleteLesson?: (moduleId: string, lessonId: string) => void;
   onEditLesson?: (moduleId: string, lesson: Lesson) => void;
-  liveEvent?: LiveEvent | null; 
-  onSelectLive?: () => void; // Novo callback
 }

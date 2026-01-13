@@ -1,5 +1,5 @@
 {
-  "name": "Plataforma de Ensino Online",
-  "description": "Plataforma PWA completa com sistema anti-skip, provas geradas por IA e integração com Google Sheets.",
+  "name": "PLATAFORMA DE ENSINO - MAM",
+  "description": "Plataforma de ensino com player nativo e quiz integrado.",
   "requestFramePermissions": []
 }
