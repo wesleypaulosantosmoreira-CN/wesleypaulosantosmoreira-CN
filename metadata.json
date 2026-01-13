@@ -1,0 +1,5 @@
+{
+  "name": "Plataforma de Ensino Online",
+  "description": "Plataforma PWA completa com sistema anti-skip, provas geradas por IA e integração com Google Sheets.",
+  "requestFramePermissions": []
+}
