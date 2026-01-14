@@ -1,24 +1,28 @@
+
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
     <!-- Título e Descrição (SEO) -->
-    <title>Academia Digital - Plataforma de Ensino</title>
+    <title>Plataforma de Ensino Online</title>
     <meta name="description" content="Acesse suas aulas, acompanhe seu progresso e realize testes de conhecimento online." />
     
-    <!-- Ícone da Aba (Favicon) - Imediato -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
+    <!-- Configuração PWA (Instalação) -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Ícone da Aba (Favicon) - Novo Logo SVG Integrado -->
+    <link rel="icon" href='data:image/svg+xml,<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="32" width="448" height="448" rx="120" fill="%234F46E5"/><path d="M256 120L100 200L256 280L412 200L256 120Z" fill="white" fill-opacity="0.95"/><path d="M200 240V380C200 395 218 405 230 395L340 320C350 312 350 298 340 290L256 230" fill="white"/><circle cx="412" cy="275" r="16" fill="%23FCD34D"/></svg>'>
     
     <!-- Ícone para iPhone/iPad -->
     <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=192&auto=format&fit=crop">
 
     <!-- Open Graph / Facebook / WhatsApp -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Academia Digital" />
+    <meta property="og:site_name" content="Plataforma de Ensino Online" />
     <meta property="og:url" content="https://academia-digital-19ebfd4c.base44.app/" />
-    <meta property="og:title" content="Academia Digital - Plataforma de Ensino" />
+    <meta property="og:title" content="Plataforma de Ensino Online" />
     <meta property="og:description" content="Estude de onde estiver. Assista às aulas, tire dúvidas e conquiste seu certificado." />
     <!-- Adicionado ?v=2 para tentar limpar o cache do WhatsApp -->
     <meta property="og:image" content="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop&v=2" />
@@ -29,7 +33,7 @@
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Academia Digital" />
+    <meta name="twitter:title" content="Plataforma de Ensino Online" />
     <meta name="twitter:description" content="Estude de onde estiver. Plataforma completa de ensino." />
     <meta name="twitter:image" content="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop&v=2" />
 
@@ -37,14 +41,28 @@
     <meta name="theme-color" content="#09090b" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Academia Digital">
+    <meta name="apple-mobile-web-app-title" content="Ensino Online">
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Fontes para o Certificado -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Biblioteca HTML2PDF para download real -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #09090b; /* Match zinc-950 to prevent white flash */
       }
       /* Custom range slider styling for the video player */
       input[type=range] {
@@ -57,6 +75,138 @@
       input[type=range]:focus {
         outline: none; 
       }
+      
+      /* Classes utilitárias para fontes do certificado */
+      .font-cinzel { font-family: 'Cinzel', serif; }
+      .font-playfair { font-family: 'Playfair Display', serif; }
+      .font-signature { font-family: 'Great Vibes', cursive; }
+
+      /* ========================================= */
+      /* TEMA CINZA (GRAY THEME / GRAFITE MODE)    */
+      /* ========================================= */
+      
+      /* 1. FUNDO GERAL (Body e Containers Principais) - Grafite Escuro (#27272a - Zinc 800) */
+      html.gray-theme body {
+         background-color: #27272a !important; 
+         color: #e4e4e7 !important; /* Texto claro */
+      }
+      
+      /* Sobrescreve fundos claros padrões */
+      html.gray-theme .bg-zinc-50,
+      html.gray-theme .bg-zinc-100 {
+         background-color: #27272a !important; 
+         border-color: #3f3f46 !important;
+      }
+      
+      /* 2. CARTÕES E ELEMENTOS BRANCOS - Cinza Chumbo (#3f3f46 - Zinc 700) */
+      html.gray-theme .bg-white {
+          background-color: #3f3f46 !important; 
+          border-color: #52525b !important; /* Bordas sutis */
+          color: #e4e4e7 !important;
+      }
+      
+      /* 3. INPUTS E FORMULÁRIOS */
+      html.gray-theme input, 
+      html.gray-theme textarea, 
+      html.gray-theme select {
+          background-color: #18181b !important; 
+          border-color: #52525b !important;
+          color: #e4e4e7 !important;
+      }
+
+      /* 4. TEXTOS */
+      html.gray-theme .text-zinc-900,
+      html.gray-theme .text-zinc-800,
+      html.gray-theme .text-zinc-700,
+      html.gray-theme .text-black {
+          color: #e4e4e7 !important; 
+      }
+      
+      html.gray-theme .text-zinc-600,
+      html.gray-theme .text-zinc-500 {
+          color: #a1a1aa !important; 
+      }
+
+      html.gray-theme .text-white {
+          color: #ffffff !important;
+      }
+
+      /* 5. BORDAS */
+      html.gray-theme .border-zinc-200, 
+      html.gray-theme .border-zinc-300 {
+          border-color: #3f3f46 !important;
+      }
+      
+      /* 6. HOVERS */
+      html.gray-theme .hover\:bg-zinc-200:hover,
+      html.gray-theme .hover\:bg-zinc-100:hover {
+          background-color: #52525b !important; 
+      }
+      
+      /* 7. MODAIS E SIDEBARS */
+      html.gray-theme .bg-white\/90,
+      html.gray-theme .bg-white\/50 {
+          background-color: #3f3f46 !important;
+          opacity: 1;
+      }
+
+      /* ======================================================= */
+      /*  PROVA FINAL EM AZUL (SOMENTE NO TEMA CINZA)            */
+      /* ======================================================= */
+      
+      /* Fundo da tela inteira da prova */
+      html.gray-theme .final-exam-container {
+          background-color: #0f172a !important; /* Slate 900 (Azul Profundo) */
+      }
+
+      /* Cartão da prova */
+      html.gray-theme .final-exam-card {
+          background-color: #1e293b !important; /* Slate 800 (Azul Escuro) */
+          border-color: #334155 !important; /* Slate 700 */
+          box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.5) !important;
+      }
+
+      /* Cabeçalho e Rodapé do cartão */
+      html.gray-theme .final-exam-header,
+      html.gray-theme .final-exam-footer {
+          background-color: #0f172a !important; /* Slate 900 */
+          border-color: #334155 !important;
+      }
+      
+      /* Texto da pergunta */
+      html.gray-theme .final-exam-text {
+          color: #f1f5f9 !important; /* Slate 100 */
+      }
+      
+      /* Contador de questões */
+      html.gray-theme .final-exam-counter {
+          color: #94a3b8 !important; /* Slate 400 */
+      }
+
+      /* Opções de Resposta */
+      html.gray-theme .final-exam-option {
+          background-color: #1e293b !important;
+          border-color: #334155 !important;
+          color: #cbd5e1 !important; /* Slate 300 */
+      }
+      
+      html.gray-theme .final-exam-option:hover {
+          background-color: #334155 !important;
+          border-color: #475569 !important;
+      }
+      
+      /* Opção Selecionada */
+      html.gray-theme .final-exam-option.selected {
+          background-color: #1e1b4b !important; /* Indigo 950 */
+          border-color: #6366f1 !important; /* Indigo 500 */
+          color: white !important;
+      }
+      
+      /* Barra de Progresso Fundo */
+      html.gray-theme .final-exam-progress-bg {
+          background-color: #0f172a !important;
+      }
+
     </style>
   <script type="importmap">
 {
@@ -69,10 +219,8 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-zinc-950 text-zinc-100 antialiased">
+  <body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased transition-colors duration-300">
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+  </body>
 </html>
