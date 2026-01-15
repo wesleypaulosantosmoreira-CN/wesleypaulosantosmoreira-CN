@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
   <head>
@@ -9,7 +8,7 @@
     <title>Plataforma de Ensino Online</title>
     <meta name="description" content="Acesse suas aulas, acompanhe seu progresso e realize testes de conhecimento online." />
     
-    <!-- Configuração PWA (Instalação) - Ajustado para caminho relativo para evitar 404 -->
+    <!-- Configuração PWA (Instalação) - Ajustado para caminho relativo para evitar 404 no GitHub Pages -->
     <link rel="manifest" href="./manifest.json" />
 
     <!-- Ícone da Aba (Favicon) -->
@@ -25,7 +24,7 @@
     <meta property="og:description" content="Estude de onde estiver. Assista às aulas, tire dúvidas e conquiste seu certificado." />
     <meta property="og:image" content="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" />
 
-    <!-- Mobile App Polish & PWA Fixes -->
+    <!-- Mobile App Polish & PWA Fixes (Suporte para Android e iOS) -->
     <meta name="theme-color" content="#09090b" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -52,6 +51,8 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
+        /* Evita problemas de scroll no mobile */
+        overscroll-behavior-y: contain;
       }
       /* Custom range slider styling for the video player */
       input[type=range] {
@@ -84,8 +85,6 @@
           border-color: #52525b !important;
           color: #e4e4e7 !important;
       }
-      
-      /* ... rest of the styles ... */
     </style>
   <script type="importmap">
 {
