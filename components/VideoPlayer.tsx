@@ -1,7 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { AlertTriangle, Loader2, Lock, ShieldAlert, FastForward } from 'lucide-react';
-import { Logo } from './Logo';
+import { AlertTriangle, Loader2, Lock, ShieldAlert, FastForward, Play } from 'lucide-react';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -26,212 +24,146 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [error, setError] = useState<{code: number, msg: string} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isPlaying, setIsPlaying] = useState(false);
   
-  // Rastreia o ponto máximo assistido
+  // Controle de progresso assistido
   const [maxWatched, setMaxWatched] = useState(initialTime);
   const [showLockedMessage, setShowLockedMessage] = useState(false);
-  const lockedMessageTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lockTimeoutRef = useRef<number | null>(null);
 
-  // Helper para detectar YouTube
-  const getYouTubeId = (url: string) => {
-      if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-  };
-
-  const youtubeId = getYouTubeId(videoUrl);
-
-  // Reinicia estados quando a URL muda
   useEffect(() => {
-    setIsLoading(autoPlay);
-    setError(null);
+    setIsPlaying(false);
     setIsEnded(false);
-    setIsPlaying(autoPlay);
-    setMaxWatched(initialTime); 
-    setShowLockedMessage(false);
-
-    if (!videoUrl) {
-        setIsLoading(false);
-        setError({ code: 0, msg: "URL não fornecida" });
-        return;
+    setError(null);
+    setMaxWatched(initialTime);
+    
+    if (videoRef.current) {
+      videoRef.current.currentTime = initialTime;
     }
+  }, [videoUrl, initialTime]);
 
-    if (!youtubeId && videoRef.current) {
-        if (!autoPlay) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = initialTime;
-        } else {
-            // Pequeno delay para garantir que o DOM atualizou
-            setTimeout(() => {
-                if (videoRef.current && initialTime > 0) {
-                    videoRef.current.currentTime = initialTime;
-                }
-            }, 100);
-        }
+  const handleSeekCheck = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (allowSkip || isEnded) return;
+    
+    const vid = e.currentTarget;
+    // Se o usuário tentar pular mais de 2 segundos além do que já assistiu
+    if (vid.currentTime > maxWatched + 2.0) {
+      vid.currentTime = maxWatched;
+      triggerLockWarning();
     }
-  }, [videoUrl, initialTime, autoPlay, youtubeId]);
-
-  const handlePlayClick = () => {
-      setIsPlaying(true);
-      if (!youtubeId) {
-          setIsLoading(true);
-          if (videoRef.current) {
-              videoRef.current.play().catch(err => console.error("Erro ao iniciar play:", err));
-          }
-      }
   };
 
-  // --- LÓGICA ANTI-SKIP (Apenas para vídeo nativo HTML5) ---
-  const handleSeekCheck = () => {
-    const vid = videoRef.current;
-    if (!vid || allowSkip || isEnded) return;
-
-    const currentTime = vid.currentTime;
-    // Tolerância de 1 segundo para evitar falsos positivos em lags de rede
-    if (currentTime > maxWatched + 1.0) {
-        vid.currentTime = maxWatched; // Força voltar para onde estava
-        setShowLockedMessage(true);
-        
-        if (lockedMessageTimeoutRef.current) clearTimeout(lockedMessageTimeoutRef.current);
-        lockedMessageTimeoutRef.current = setTimeout(() => setShowLockedMessage(false), 3000);
-    }
+  const triggerLockWarning = () => {
+    setShowLockedMessage(true);
+    if (lockTimeoutRef.current) window.clearTimeout(lockTimeoutRef.current);
+    lockTimeoutRef.current = window.setTimeout(() => setShowLockedMessage(false), 3000);
   };
 
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const vid = e.currentTarget;
-    const time = vid.currentTime;
-    
-    if (onProgress) onProgress(time);
-    
-    // Verificação dupla no TimeUpdate
-    if (!allowSkip && !isEnded && time > maxWatched + 1.0) {
-        handleSeekCheck();
-    } else {
-        if (time > maxWatched) {
-            setMaxWatched(time);
-        }
+    const current = vid.currentTime;
+
+    if (onProgress) onProgress(current);
+
+    // Se estiver assistindo conteúdo novo, atualiza o limite máximo
+    if (current > maxWatched) {
+      // Impede burlar via script se o salto for muito grande entre frames de atualização
+      if (current > maxWatched + 3.0 && !allowSkip && !isEnded) {
+        vid.currentTime = maxWatched;
+        triggerLockWarning();
+      } else {
+        setMaxWatched(current);
+      }
     }
   };
 
-  if (error) {
-     return (
-         <div className="w-full h-full bg-zinc-950 flex flex-col items-center justify-center border border-red-500/20 rounded-xl p-6 text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none"></div>
-            <AlertTriangle className="text-red-500 mb-3 relative z-10" size={40} />
-            <h3 className="text-white font-bold mb-2 relative z-10">Vídeo Indisponível</h3>
-            <p className="text-zinc-400 text-sm max-w-md relative z-10">{error.msg}</p>
-        </div>
-     );
-  }
-  
-  const hasCustomThumbnail = thumbnailUrl && !thumbnailUrl.includes('picsum');
+  const startVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-lg group border border-zinc-800 select-none">
-        
-        {/* THUMBNAIL OVERLAY (CAPA) */}
-        {!isPlaying && !error && (
-            <div 
-                className="absolute inset-0 z-40 bg-zinc-900 flex items-center justify-center cursor-pointer group/overlay overflow-hidden"
-                onClick={handlePlayClick}
-                title="Clique para assistir"
-            >
-                {hasCustomThumbnail ? (
-                    <img 
-                        src={thumbnailUrl} 
-                        alt="Capa da Aula" 
-                        className="w-full h-full object-cover opacity-80 group-hover/overlay:opacity-100 transition-opacity duration-300"
-                    />
-                ) : (
-                     <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/50">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-zinc-950 opacity-80"></div>
-                        <div className="opacity-30 group-hover/overlay:opacity-60 transform transition-all duration-500 grayscale group-hover/overlay:grayscale-0 scale-100 group-hover/overlay:scale-110">
-                            <Logo size={120} showText={false} />
-                        </div>
-                     </div>
-                )}
+    <div className="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl group border border-zinc-800">
+      
+      {/* Aviso de Bloqueio (Anti-Skip) */}
+      {showLockedMessage && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] pointer-events-none">
+          <div className="bg-zinc-900 border border-red-500/50 p-6 rounded-2xl flex flex-col items-center gap-3 shadow-2xl animate-shake">
+            <div className="bg-red-500/20 p-3 rounded-full">
+              <Lock className="text-red-500" size={32} />
             </div>
-        )}
-
-        {/* LOADER (Apenas para vídeo nativo) */}
-        {!youtubeId && isLoading && isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 z-10">
-                <Loader2 className="text-indigo-500 animate-spin" size={40} />
+            <div className="text-center">
+              <p className="text-white font-bold text-lg">Avanço Bloqueado</p>
+              <p className="text-zinc-400 text-sm">Você precisa assistir ao conteúdo para progredir.</p>
             </div>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* Mensagem de Bloqueio (Anti-Skip) */}
-        {showLockedMessage && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none animate-in fade-in zoom-in-95 duration-200">
-                <div className="bg-black/90 backdrop-blur-md text-white px-6 py-4 rounded-xl border border-red-500/30 flex flex-col items-center gap-2 shadow-2xl transform scale-100">
-                    <div className="bg-red-500/20 p-3 rounded-full">
-                        <Lock size={24} className="text-red-500" />
-                    </div>
-                    <p className="font-bold text-lg text-red-100">Vídeo Bloqueado</p>
-                    <p className="text-sm text-zinc-400 text-center max-w-[200px]">Você deve assistir todo o conteúdo sem pular.</p>
-                </div>
-            </div>
-        )}
+      {/* Capa / Play Inicial */}
+      {!isPlaying && !isEnded && (
+        <div 
+          className="absolute inset-0 z-40 bg-zinc-900 flex items-center justify-center cursor-pointer group"
+          onClick={startVideo}
+        >
+          {thumbnailUrl ? (
+            <img src={thumbnailUrl} className="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity" alt="Capa" />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-black"></div>
+          )}
+          <div className="relative z-10 bg-indigo-600 p-6 rounded-full shadow-2xl transform group-hover:scale-110 transition-transform">
+            <Play className="text-white fill-white" size={32} />
+          </div>
+          <p className="absolute bottom-10 text-zinc-400 font-medium group-hover:text-white transition-colors">Clique para iniciar sua aula</p>
+        </div>
+      )}
 
-        {/* PLAYER YOUTUBE */}
-        {youtubeId && isPlaying ? (
-             <iframe 
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`}
-                title="YouTube video player"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-             ></iframe>
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        className="w-full h-full object-contain"
+        controls
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
+        onTimeUpdate={handleTimeUpdate}
+        onSeeking={handleSeekCheck}
+        onEnded={() => {
+          setIsEnded(true);
+          onComplete();
+        }}
+        onWaiting={() => setIsLoading(true)}
+        onPlaying={() => setIsLoading(false)}
+        onError={() => setError({ code: 1, msg: "Erro ao carregar vídeo. Verifique o link." })}
+      />
+
+      {/* Badge de Proteção */}
+      <div className="absolute top-4 right-4 z-20">
+        {allowSkip ? (
+          <div className="bg-amber-500/90 text-black text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1.5">
+            <FastForward size={12} /> MODO ADMIN
+          </div>
         ) : (
-             /* PLAYER NATIVO (MP4, WebM, etc) */
-             <video 
-                ref={videoRef}
-                src={videoUrl}
-                className={`w-full h-full object-contain ${youtubeId ? 'hidden' : 'block'}`}
-                controls
-                playsInline
-                controlsList="nodownload" 
-                onTimeUpdate={handleTimeUpdate}
-                onSeeking={handleSeekCheck} // PROTEÇÃO ATIVADA: Bloqueia arrastar a barra
-                onEnded={() => {
-                    setIsEnded(true);
-                    setMaxWatched(Number.MAX_SAFE_INTEGER);
-                    onComplete();
-                }}
-                onError={() => {
-                    if (isPlaying && !youtubeId) {
-                        setError({ code: 5, msg: "Erro ao carregar vídeo. Verifique se o link é um arquivo direto (MP4) ou YouTube." });
-                        setIsLoading(false);
-                    }
-                }}
-                onLoadStart={() => { if (isPlaying) setIsLoading(true); }}
-                onCanPlay={() => {
-                    setIsLoading(false);
-                    if (videoRef.current && initialTime > 0 && Math.abs(videoRef.current.currentTime - initialTime) > 2) {
-                        videoRef.current.currentTime = initialTime;
-                    }
-                }}
-            />
+          <div className="bg-black/60 backdrop-blur-md text-zinc-300 text-[10px] font-bold px-3 py-1 rounded-full border border-zinc-700/50 flex items-center gap-1.5">
+            <ShieldAlert size={12} className="text-indigo-400" /> PROTEÇÃO ANTI-SKIP ATIVA
+          </div>
         )}
-        
-        {/* Anti-Skip Badge & Admin Indicator (Só aparece se não for YouTube e estiver tocando) */}
-        {!youtubeId && !isEnded && !isLoading && !error && isPlaying && (
-             <div className="absolute top-4 right-4 z-20 flex flex-col items-end gap-1 pointer-events-none opacity-50 group-hover:opacity-100 transition-opacity">
-                 {allowSkip ? (
-                     <div className="bg-amber-500/90 backdrop-blur-md text-black text-[10px] font-bold px-3 py-1.5 rounded-full border border-amber-500/50 flex items-center gap-1.5 shadow-sm">
-                          <FastForward size={12} /> 
-                          <span>ADMIN: PULO LIBERADO</span>
-                     </div>
-                 ) : (
-                     <div className="bg-black/60 backdrop-blur-md text-zinc-300 text-[10px] font-bold px-3 py-1.5 rounded-full border border-zinc-700/50 flex items-center gap-1.5 shadow-sm">
-                          <ShieldAlert size={12} className="text-indigo-400" /> 
-                          <span>ANTI-SKIP RIGOROSO</span>
-                     </div>
-                 )}
-             </div>
-        )}
+      </div>
+
+      {isLoading && isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+          <Loader2 className="text-indigo-500 animate-spin" size={48} />
+        </div>
+      )}
+
+      {error && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-950 text-center p-6 z-50">
+          <AlertTriangle className="text-red-500 mb-4" size={48} />
+          <h3 className="text-white font-bold text-xl mb-2">Ops! Algo deu errado</h3>
+          <p className="text-zinc-400 max-w-xs">{error.msg}</p>
+        </div>
+      )}
     </div>
   );
 };

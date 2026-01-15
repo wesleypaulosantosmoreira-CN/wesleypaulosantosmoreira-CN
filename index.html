@@ -4,68 +4,61 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     
-    <!-- Título e Descrição (SEO) -->
     <title>Plataforma de Ensino Online</title>
-    <meta name="description" content="Acesse suas aulas, acompanhe seu progresso e realize testes de conhecimento online." />
+    <meta name="description" content="Assista suas aulas sem interrupções. Sistema anti-skip integrado." />
     
-    <!-- Configuração PWA (Instalação) - Caminho Relativo Essencial para GitHub Pages -->
+    <!-- Uso de caminhos relativos para compatibilidade com GitHub Pages -->
     <link rel="manifest" href="./manifest.json" />
-
-    <!-- Ícone da Aba (Favicon) -->
     <link rel="icon" href='data:image/svg+xml,<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="32" y="32" width="448" height="448" rx="120" fill="%234F46E5"/><path d="M256 120L100 200L256 280L412 200L256 120Z" fill="white" fill-opacity="0.95"/><path d="M200 240V380C200 395 218 405 230 395L340 320C350 312 350 298 340 290L256 230" fill="white"/><circle cx="412" cy="275" r="16" fill="%23FCD34D"/></svg>'>
     
-    <!-- Ícone para iPhone/iPad -->
-    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=192&auto=format&fit=crop">
-
-    <!-- Open Graph / Facebook / WhatsApp -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Plataforma de Ensino Online" />
-    <meta property="og:title" content="Plataforma de Ensino Online" />
-    <meta property="og:description" content="Estude de onde estiver. Assista às aulas, tire dúvidas e conquiste seu certificado." />
-    <meta property="og:image" content="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&auto=format&fit=crop" />
-
-    <!-- Mobile App Polish & PWA Fixes (Suporte para Android e iOS) -->
     <meta name="theme-color" content="#09090b" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ensino Online">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
-          extend: {}
+          extend: {
+            colors: {
+              indigo: {
+                600: '#4F46E5',
+                700: '#4338CA',
+              }
+            }
+          }
         }
       }
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        overscroll-behavior-y: contain;
+        background-color: #09090b; /* Garante que o fundo não seja branco enquanto carrega */
+        color: #f4f4f5;
+        overflow-x: hidden;
       }
-      /* Previne flashes brancos se o JS demorar a carregar */
       #root:empty {
         background-color: #09090b;
         min-height: 100vh;
       }
-      
-      input[type=range] { -webkit-appearance: none; background: transparent; }
-      input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; }
-      input[type=range]:focus { outline: none; }
-      
-      .font-cinzel { font-family: 'Cinzel', serif; }
-      .font-playfair { font-family: 'Playfair Display', serif; }
-      .font-signature { font-family: 'Great Vibes', cursive; }
+      /* Custom scrollbar para visual premium */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #18181b; }
+      ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #4f46e5; }
 
-      html.gray-theme body { background-color: #27272a !important; color: #e4e4e7 !important; }
-      html.gray-theme .bg-zinc-50, html.gray-theme .bg-zinc-100 { background-color: #27272a !important; border-color: #3f3f46 !important; }
-      html.gray-theme .bg-white { background-color: #3f3f46 !important; border-color: #52525b !important; color: #e4e4e7 !important; }
+      /* Animação do aviso de bloqueio */
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+      .animate-shake { animation: shake 0.3s ease-in-out; }
     </style>
     
     <script type="importmap">
@@ -82,9 +75,9 @@
 }
 </script>
   </head>
-  <body class="bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 antialiased transition-colors duration-300">
+  <body class="dark bg-zinc-950">
     <div id="root"></div>
-    <!-- Ponto de entrada explícito para garantir a renderização no GitHub Pages -->
+    <!-- Chamada do módulo principal com caminho relativo baseado no arquivo index.tsx existente -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
